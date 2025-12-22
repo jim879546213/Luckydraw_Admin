@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>創友回娘家 - 抽獎</title>
+    <style>
+        /* 避免手機上文字被選取，提升操作流暢度 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: hidden; /* 防止橡皮筋回彈效果 */
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 30px; /* 更圓潤的手機風格 */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 380px;
+            border: 4px solid #fff;
+        }
+
+        h1 { color: #d35400; font-size: 1.8rem; margin-bottom: 0.5rem; }
+
+        .gift-box-container { 
+            width: 140px; 
+            height: 140px; 
+            margin: 20px auto; 
+            position: relative; 
+        }
+
+        .gacha-box {
+            width: 100%; height: 100%; background: #fff; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 6px solid #f8f8f8; box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+        }
+
+        .gacha-icon { width: 70px; height: 70px; }
+
+        .shaking { animation: shake 0.3s infinite; border-color: #ffd700; }
+
+        @keyframes shake {
+            0% { transform: translate(0,0) rotate(0deg); }
+            25% { transform: translate(2px, 2px) rotate(5deg); }
+            50% { transform: translate(-2px, -2px) rotate(-5deg); }
+            75% { transform: translate(2px, -2px) rotate(5deg); }
+            100% { transform: translate(0,0) rotate(0deg); }
+        }
+
+        button {
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            color: white; border: none; 
+            padding: 16px 0;
+            width: 100%; /* 手機上滿版按鈕更好按 */
+            font-size: 1.4rem; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(255, 117, 140, 0.3);
+            transition: transform 0.1s, box-shadow 0.2s;
+            outline: none;
+        }
+
+        /* 手機按下的縮放回饋 */
+        button:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 10px rgba(255, 117, 140, 0.2);
+        }
+
+        button:disabled { 
+            background: #d1d8e0; 
+            box-shadow: none;
+            transform: none;
+        }
+
+        #result-area { 
+            margin-top: 25px; 
+            min-height: 80px; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            opacity: 0; 
+            transition: 0.5s; 
+        }
+
+        .show-result { opacity: 1 !important; }
+        .result-highlight { 
+            color: #ff4757; 
+            font-size: 2.2rem; 
+            display: block; 
+            margin-top: 10px;
+            text-shadow: 1px 1px 0px #fff;
+        }
+
+        #status-msg { position: fixed; bottom: 15px; font-size: 10px; color: #aaa; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>創友回娘家</h1>
+    <div id="prize-count-info" style="color: #7f8c8d; margin-bottom: 20px; font-size: 0.9rem;">連線中...</div>
+
+    <div class="gift-box-container">
+        <div class="gacha-box" id="display-icon">
+            <svg class="gacha-icon" viewBox="0 0 64 64"><path fill="#FFD700" d="M10 28h44v28H10z"/><path fill="#FF4757" d="M2 18h60v10H2z"/><path fill="#FF4757" d="M32 18c0-8-8-12-12-6s4 12 12 6z"/></svg>
+        </div>
+    </div>
+
+    <button id="draw-btn" disabled>載入中...</button>
+    <div id="result-area"></div>
+</div>
+
+<div id="status-msg">雲端抽獎系統 v2.0 (Mobile Ready)</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyD4GqSck1qhMR_iK26YYbYKr_iY2Py0kAo",
+        authDomain: "luckydraw-5ffc4.firebaseapp.com",
+        projectId: "luckydraw-5ffc4",
+        storageBucket: "luckydraw-5ffc4.firebasestorage.app",
+        messagingSenderId: "60338826922",
+        appId: "1:60338826922:web:80a5187410e88755baead3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const DOC_ID = "main_lottery"; 
+    
+    let currentPrizes = [];
+
+    onSnapshot(doc(db, "games", DOC_ID), (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            currentPrizes = data.prizes;
+            const total = currentPrizes.reduce((sum, p) => sum + p.count, 0);
+            document.getElementById('prize-count-info').textContent = `剩餘獎項：${total} 份`;
+            
+            const btn = document.getElementById('draw-btn');
+            if (total > 0) {
+                btn.disabled = false;
+                btn.textContent = "立即抽獎";
+            } else {
+                btn.disabled = true;
+                btn.textContent = "獎項已抽完";
+            }
+        } else {
+            document.getElementById('prize-count-info').textContent = "系統尚未就緒";
+        }
+    });
+
+    window.drawPrize = async () => {
+        const btn = document.getElementById('draw-btn');
+        const resultArea = document.getElementById('result-area');
+        const iconBox = document.getElementById('display-icon');
+
+        if(btn.disabled) return;
+        
+        // 觸覺反饋（如果手機支援）
+        if (navigator.vibrate) navigator.vibrate(50);
+
+        btn.disabled = true;
+        resultArea.classList.remove('show-result');
+        iconBox.classList.add('shaking');
+
+        const pool = currentPrizes.filter(p => p.count > 0);
+        if (pool.length === 0) return;
+
+        const picked = pool[Math.floor(Math.random() * pool.length)];
+        const newPrizes = currentPrizes.map(p => {
+            if (p.id === picked.id) return { ...p, count: p.count - 1 };
+            return p;
+        });
+
+        try {
+            await setDoc(doc(db, "games", DOC_ID), {
+                prizes: newPrizes,
+                updatedAt: new Date().toISOString()
+            });
+
+            setTimeout(() => {
+                iconBox.classList.remove('shaking');
+                resultArea.innerHTML = `恭喜獲得<span class="result-highlight">${picked.name}</span>`;
+                resultArea.classList.add('show-result');
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            }, 1000);
+
+        } catch (e) {
+            alert("同步失敗，請檢查網路。");
+            btn.disabled = false;
+            iconBox.classList.remove('shaking');
+        }
+    };
+
+    document.getElementById('draw-btn').onclick = window.drawPrize;
+</script>
+</body>
+</html>
