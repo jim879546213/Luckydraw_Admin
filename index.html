@@ -3,369 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>創友回娘家 - 聖誕雲端抽獎</title>
+    <title>獎品後台管理系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        :root {
-            --xmas-red: #d42426;
-            --xmas-green: #165b33;
-            --xmas-gold: #f8b229;
-            --snow-white: #f0f4f8;
-            --bg-gradient: linear-gradient(135deg, #1a472a 0%, #0d2b1d 100%);
-        }
-
-        body {
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-            background: var(--bg-gradient);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow: hidden; /* 防止雪花導致滾動條 */
-            position: relative;
-        }
-
-        /* 雪花特效層 */
-        .snow-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .snowflake {
-            position: absolute;
-            color: #fff;
-            font-size: 1em;
-            font-family: Arial;
-            text-shadow: 0 0 1px #000;
-            animation: fall linear forwards;
-        }
-
-        @keyframes fall {
-            to { transform: translateY(105vh); }
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.98);
-            padding: 2.5rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            text-align: center;
-            max-width: 420px;
-            width: 100%;
-            /* 糖果手杖邊框風格 */
-            border: 8px solid transparent;
-            background-clip: padding-box, border-box;
-            background-origin: padding-box, border-box;
-            background-image: linear-gradient(to right, #fff, #fff), repeating-linear-gradient(45deg, var(--xmas-red) 0, var(--xmas-red) 15px, #ffffff 15px, #ffffff 30px);
-            position: relative;
-            z-index: 10; /* 確保在雪花之上 */
-        }
-
-        /* 裝飾性標題 */
-        h1 { 
-            color: var(--xmas-red); 
-            margin-bottom: 0.5rem; 
-            font-weight: 900;
-            text-shadow: 2px 2px 0px rgba(220, 220, 220, 0.5);
-        }
-        
-        h1::before, h1::after {
-            content: '🎄';
-            margin: 0 10px;
-        }
-
-        #prize-count-info {
-            color: var(--xmas-green);
-            font-weight: bold;
-            background: #e8f5e9;
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-        }
-
-        .gift-box-container { 
-            width: 160px; 
-            height: 160px; 
-            margin: 10px auto 30px auto; 
-            position: relative; 
-        }
-        
-        .gacha-box {
-            width: 100%; 
-            height: 100%; 
-            background: #fff8e1; /* 淡金色背景 */
-            border-radius: 50%;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            border: 6px solid var(--xmas-gold); 
-            box-shadow: 0 0 15px rgba(248, 178, 41, 0.4);
-            transition: all 0.3s;
-        }
-        
-        .gacha-icon { width: 90px; height: 90px; }
-        
-        /* 禮物盒配色調整 */
-        .gift-base { fill: var(--xmas-red); }
-        .gift-ribbon { fill: var(--xmas-gold); }
-        
-        .shaking { animation: shake 0.5s infinite; border-color: var(--xmas-red); }
-        
-        @keyframes shake {
-            0% { transform: rotate(0deg); }
-            20% { transform: rotate(-15deg); }
-            40% { transform: rotate(10deg); }
-            60% { transform: rotate(-10deg); }
-            80% { transform: rotate(5deg); }
-            100% { transform: rotate(0deg); }
-        }
-
-        button {
-            background: linear-gradient(to bottom, #d42426, #b31d1f);
-            color: white; 
-            border: none; 
-            padding: 15px 50px;
-            font-size: 1.3rem; 
-            border-radius: 50px; 
-            cursor: pointer; 
-            font-weight: bold;
-            box-shadow: 0 6px 0 #8e1719, 0 10px 10px rgba(0,0,0,0.2);
-            transition: transform 0.1s, box-shadow 0.1s;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* 按鈕上的雪亮反光 */
-        button::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
-            animation: shine 3s infinite;
-        }
-
-        @keyframes shine {
-            0% { left: -100%; }
-            20% { left: 100%; }
-            100% { left: 100%; }
-        }
-
-        button:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 #8e1719, 0 4px 4px rgba(0,0,0,0.2);
-        }
-
-        button:disabled { 
-            background: #95a5a6; 
-            box-shadow: none;
-            cursor: not-allowed; 
-            transform: none;
-        }
-        
-        #result-area { 
-            margin-top: 25px; 
-            min-height: 60px; 
-            font-size: 1.2rem; 
-            font-weight: bold; 
-            opacity: 0; 
-            transition: 0.5s;
-            color: #2c3e50;
-        }
-        
-        .show-result { opacity: 1 !important; }
-        
-        .result-highlight { 
-            color: var(--xmas-red); 
-            font-size: 1.8rem; 
-            display: block; 
-            margin-top: 5px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        #status-msg { 
-            position: fixed; 
-            bottom: 10px; 
-            font-size: 12px; 
-            color: rgba(255,255,255,0.6); 
-            z-index: 5;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', 'PingFang TC', sans-serif; }
     </style>
 </head>
-<body>
+<body class="bg-slate-50">
+    <div id="root"></div>
 
-<!-- 雪花容器 -->
-<div class="snow-container" id="snow-container"></div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-<div class="container">
-    <h1>創友回娘家</h1>
-    <div id="prize-count-info">連線中...</div>
+        // 將 Firebase 實體掛載到 window 方便 React 使用
+        const firebaseConfig = {
+            apiKey: "AIzaSyD4GqSck1qhMR_iK26YYbYKr_iY2Py0kAo",
+            authDomain: "luckydraw-5ffc4.firebaseapp.com",
+            projectId: "luckydraw-5ffc4",
+            storageBucket: "luckydraw-5ffc4.firebasestorage.app",
+            messagingSenderId: "60338826922",
+            appId: "1:60338826922:web:80a5187410e88755baead3"
+        };
 
-    <div class="gift-box-container">
-        <div class="gacha-box" id="display-icon">
-            <!-- 調整後的 SVG，使用 class 控制顏色 -->
-            <svg class="gacha-icon" viewBox="0 0 64 64">
-                <!-- 禮物盒主體 -->
-                <path class="gift-base" d="M10 28h44v28H10z"/>
-                <!-- 蓋子 -->
-                <path class="gift-base" d="M2 18h60v10H2z"/>
-                <!-- 緞帶 (垂直) -->
-                <path class="gift-ribbon" d="M28 28h8v28h-8z"/>
-                <path class="gift-ribbon" d="M28 18h8v10h-8z"/>
-                <!-- 蝴蝶結 -->
-                <path class="gift-ribbon" d="M32 18c0-8-8-12-12-6s4 12 12 6z"/>
-                <path class="gift-ribbon" d="M32 18c0-8 8-12 12-6s-4 12-12 6z"/>
-            </svg>
-        </div>
-    </div>
+        const app = initializeApp(firebaseConfig);
+        window.db = getFirestore(app);
+        window.fsDoc = doc;
+        window.fsOnSnapshot = onSnapshot;
+        window.fsSetDoc = setDoc;
+    </script>
 
-    <button id="draw-btn" disabled>請稍候...</button>
-    <div id="result-area"></div>
-</div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-<div id="status-msg">Firebase 系統運作中 (數量權重平衡已開啟)</div>
-
-<script>
-    // 簡單的雪花生成腳本
-    function createSnowflakes() {
-        const container = document.getElementById('snow-container');
-        const count = 30; // 雪花數量
-        
-        for (let i = 0; i < count; i++) {
-            const snowflake = document.createElement('div');
-            snowflake.classList.add('snowflake');
-            snowflake.textContent = '❄';
-            snowflake.style.left = Math.random() * 100 + 'vw';
-            snowflake.style.animationDuration = Math.random() * 3 + 2 + 's'; // 2-5秒
-            snowflake.style.opacity = Math.random();
-            snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+        // --- 內嵌圖示組件 ---
+        const Icon = ({ name, className = "" }) => {
+            const baseSize = (className.includes('w-') || className.includes('h-')) ? '' : 'w-5 h-5';
             
-            // 隨機延遲開始，讓雪花看起來自然
-            snowflake.style.animationDelay = Math.random() * 5 + 's';
+            const icons = {
+                Plus: <path d="M5 12h14m-7-7v14" />,
+                Trash2: <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 9h4m-4-4h4" />,
+                Save: <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM17 21v-8H7v8M7 3v5h8" />,
+                RefreshCw: <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8m0 0V2m0 6h-6m6 4a9 9 0 1 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16m0 0v6m0-6h6" />,
+                Package: <path d="M16.5 9.4 7.5 4.21M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.27 6.96 12 12.01l8.73-5.05M12 22.08V12" />,
+                Edit3: <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />,
+                Check: <polyline points="20 6 9 17 4 12" />,
+                AlertCircle: (
+                    <React.Fragment>
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </React.Fragment>
+                ),
+                RotateCcw: <path d="M1 4v6h6M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+            };
             
-            container.appendChild(snowflake);
-        }
-    }
-    createSnowflakes();
-</script>
+            return (
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    className={`${baseSize} ${className}`}
+                >
+                    {icons[name]}
+                </svg>
+            );
+        };
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        const DOC_ID = "main_lottery";
 
-    // Firebase 配置
-    const firebaseConfig = {
-        apiKey: "AIzaSyD4GqSck1qhMR_iK26YYbYKr_iY2Py0kAo",
-        authDomain: "luckydraw-5ffc4.firebaseapp.com",
-        projectId: "luckydraw-5ffc4",
-        storageBucket: "luckydraw-5ffc4.firebasestorage.app",
-        messagingSenderId: "60338826922",
-        appId: "1:60338826922:web:80a5187410e88755baead3"
-    };
+        function App() {
+            const [prizes, setPrizes] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [saving, setSaving] = useState(false);
+            const [message, setMessage] = useState({ text: '', type: '' });
+            const [isEditing, setIsEditing] = useState(null);
+            const [newPrize, setNewPrize] = useState({ name: '', count: 0 });
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const DOC_ID = "main_lottery"; 
-    
-    let currentPrizes = [];
+            useEffect(() => {
+                const checkDb = setInterval(() => {
+                    if (window.db) {
+                        clearInterval(checkDb);
+                        startListening();
+                    }
+                }, 100);
+                
+                const startListening = () => {
+                    window.fsOnSnapshot(window.fsDoc(window.db, "games", DOC_ID), (snapshot) => {
+                        if (snapshot.exists()) {
+                            const data = snapshot.data();
+                            const sortedPrizes = (data.prizes || []).sort((a, b) => a.id - b.id);
+                            setPrizes(sortedPrizes);
+                        }
+                        setLoading(false);
+                    }, (error) => {
+                        showMsg("連線失敗：" + error.message, "error");
+                        setLoading(false);
+                    });
+                };
+            }, []);
 
-    // 即時監聽雲端數據
-    onSnapshot(doc(db, "games", DOC_ID), (snapshot) => {
-        if (snapshot.exists()) {
-            const data = snapshot.data();
-            currentPrizes = data.prizes;
-            
-            const total = currentPrizes.reduce((sum, p) => sum + p.count, 0);
-            document.getElementById('prize-count-info').textContent = `🎄 目前剩餘獎項：${total} 份`;
-            
-            const btn = document.getElementById('draw-btn');
-            if (total > 0) {
-                btn.disabled = false;
-                btn.textContent = "立即抽獎";
-            } else {
-                btn.disabled = true;
-                btn.textContent = "獎項已抽完";
+            const showMsg = (text, type = 'success') => {
+                setMessage({ text, type });
+                setTimeout(() => setMessage({ text: '', type: '' }), 3000);
+            };
+
+            const saveToCloud = async (updatedList) => {
+                setSaving(true);
+                try {
+                    await window.fsSetDoc(window.fsDoc(window.db, "games", DOC_ID), {
+                        prizes: updatedList,
+                        updatedAt: new Date().toISOString()
+                    });
+                    showMsg("雲端數據已同步成功！");
+                } catch (error) {
+                    showMsg("儲存失敗：" + error.message, "error");
+                } finally {
+                    setSaving(false);
+                }
+            };
+
+            // 新增：重置為預設庫存功能 (移植自原本的 game.html)
+            const handleResetDefault = async () => {
+                if(!window.confirm("⚠️ 警告：這將清除目前所有資料並重置為「預設庫存」。\n\n確定要繼續嗎？")) return;
+                
+                const initialData = [
+                    { id: 1, name: "Ｂ賞", count: 5 },
+                    { id: 2, name: "Ｄ賞", count: 7 },
+                    { id: 3, name: "Ｃ賞", count: 18 },
+                    { id: 4, name: "Ａ賞", count: 70 }
+                ];
+                
+                // 直接呼叫 saveToCloud，它會處理 setDoc 並觸發 onSnapshot 更新本地 state
+                await saveToCloud(initialData);
+                showMsg("已重置為初始狀態！");
+            };
+
+            const handleAddPrize = () => {
+                if (!newPrize.name) return showMsg("請輸入獎項名稱", "error");
+                const nextId = prizes.length > 0 ? Math.max(...prizes.map(p => p.id)) + 1 : 1;
+                const newList = [...prizes, { id: nextId, name: newPrize.name, count: parseInt(newPrize.count) || 0 }];
+                setPrizes(newList);
+                setNewPrize({ name: '', count: 0 });
+                saveToCloud(newList);
+            };
+
+            const handleDelete = (id) => {
+                if (!window.confirm("確定要刪除此獎項嗎？")) return;
+                const newList = prizes.filter(p => p.id !== id);
+                setPrizes(newList);
+                saveToCloud(newList);
+            };
+
+            const handleUpdateItem = (id, field, value) => {
+                const newList = prizes.map(p => {
+                    if (p.id === id) {
+                        return { ...p, [field]: field === 'count' ? parseInt(value) || 0 : value };
+                    }
+                    return p;
+                });
+                setPrizes(newList);
+            };
+
+            const totalPrizes = prizes.reduce((sum, p) => sum + p.count, 0);
+
+            if (loading) {
+                return (
+                    <div className="flex items-center justify-center min-h-screen">
+                        <Icon name="RefreshCw" className="w-8 h-8 text-blue-500 animate-spin" />
+                        <span className="ml-2 text-slate-600 font-medium">載入中...</span>
+                    </div>
+                );
             }
-        } else {
-            document.getElementById('prize-count-info').textContent = "系統維護中 (資料庫未初始化)";
+
+            return (
+                <div className="min-h-screen pb-20">
+                    <nav className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+                        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <div className="bg-indigo-600 p-2 rounded-lg text-white">
+                                    <Icon name="Package" />
+                                </div>
+                                <h1 className="text-xl font-bold text-slate-800">抽獎後台管理</h1>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                                {saving && <span className="text-xs text-slate-400 animate-pulse">同步中...</span>}
+                                <div className="text-right hidden sm:block">
+                                    <p className="text-xs text-slate-500 font-semibold">系統狀態</p>
+                                    <p className="text-sm text-green-600 font-medium flex items-center">
+                                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span> 連線正常
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <main className="max-w-5xl mx-auto px-4 py-8">
+                        {message.text && (
+                            <div className={`mb-6 p-4 rounded-xl flex items-center shadow-sm border ${
+                                message.type === 'error' ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'
+                            }`}>
+                                <Icon name="AlertCircle" className="mr-3 w-5 h-5" />
+                                <span className="font-medium">{message.text}</span>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                                <p className="text-slate-500 text-sm font-medium mb-1">總剩餘獎項</p>
+                                <p className="text-3xl font-bold text-slate-900">{totalPrizes} <span className="text-base font-normal text-slate-400">份</span></p>
+                            </div>
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                                <p className="text-slate-500 text-sm font-medium mb-1">獎品種類</p>
+                                <p className="text-3xl font-bold text-slate-900">{prizes.length} <span className="text-base font-normal text-slate-400">種</span></p>
+                            </div>
+                            
+                            {/* 操作區塊 */}
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-center space-y-3">
+                                <button onClick={() => saveToCloud(prizes)} disabled={saving} className="w-full flex items-center justify-center bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl transition-all disabled:opacity-50">
+                                    <Icon name="Save" className="mr-2 w-5 h-5" /> 儲存目前修改
+                                </button>
+                                <button onClick={handleResetDefault} disabled={saving} className="w-full flex items-center justify-center bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 font-semibold py-2 rounded-xl transition-all text-sm border border-slate-200">
+                                    <Icon name="RotateCcw" className="mr-2 w-4 h-4" /> 重置為預設庫存
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+                            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                <h2 className="font-bold text-slate-700">獎項清單 (即時監控中)</h2>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="text-slate-400 text-xs uppercase border-b border-slate-100">
+                                            <th className="px-6 py-4">ID</th>
+                                            <th className="px-6 py-4">獎品名稱</th>
+                                            <th className="px-6 py-4">庫存</th>
+                                            <th className="px-6 py-4 text-right">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {prizes.map((prize) => (
+                                            <tr key={prize.id} className="hover:bg-slate-50/30 transition-colors">
+                                                <td className="px-6 py-4 text-slate-400 text-sm">#{prize.id}</td>
+                                                <td className="px-6 py-4">
+                                                    {isEditing === prize.id ? (
+                                                        <input type="text" value={prize.name} onChange={(e) => handleUpdateItem(prize.id, 'name', e.target.value)} className="w-full px-2 py-1 border border-indigo-300 rounded" />
+                                                    ) : (
+                                                        <span className="font-semibold text-slate-700">{prize.name}</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {isEditing === prize.id ? (
+                                                        <input type="number" value={prize.count} onChange={(e) => handleUpdateItem(prize.id, 'count', e.target.value)} className="w-20 px-2 py-1 border border-indigo-300 rounded" />
+                                                    ) : (
+                                                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${prize.count > 0 ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600'}`}>{prize.count}</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex justify-end space-x-1">
+                                                        {isEditing === prize.id ? (
+                                                            <button onClick={() => { setIsEditing(null); saveToCloud(prizes); }} className="p-1.5 text-green-600 hover:bg-green-50 rounded"><Icon name="Check" /></button>
+                                                        ) : (
+                                                            <button onClick={() => setIsEditing(prize.id)} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded"><Icon name="Edit3" /></button>
+                                                        )}
+                                                        <button onClick={() => handleDelete(prize.id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"><Icon name="Trash2" /></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div className="bg-indigo-900 rounded-2xl shadow-lg p-6 text-white">
+                            <h2 className="text-lg font-bold mb-4 flex items-center">
+                                <Icon name="Plus" className="mr-2 w-5 h-5" /> 新增獎項
+                            </h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                                <div className="sm:col-span-2">
+                                    <label className="block text-indigo-200 text-xs mb-1">名稱</label>
+                                    <input type="text" value={newPrize.name} onChange={(e) => setNewPrize({...newPrize, name: e.target.value})} className="w-full bg-indigo-800 border-none rounded-xl px-4 py-2" placeholder="例：特獎" />
+                                </div>
+                                <div>
+                                    <label className="block text-indigo-200 text-xs mb-1">數量</label>
+                                    <input type="number" value={newPrize.count} onChange={(e) => setNewPrize({...newPrize, count: e.target.value})} className="w-full bg-indigo-800 border-none rounded-xl px-4 py-2" />
+                                </div>
+                                <div className="flex items-end">
+                                    <button onClick={handleAddPrize} className="w-full bg-white text-indigo-900 font-bold py-2 rounded-xl">新增</button>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <footer className="text-center py-6 text-slate-400 text-xs">
+                        Firestore Cloud Sync Active
+                    </footer>
+                </div>
+            );
         }
-    });
 
-    // 抽獎邏輯 (基於剩餘數量的加權演算法)
-    window.drawPrize = async () => {
-        const btn = document.getElementById('draw-btn');
-        const resultArea = document.getElementById('result-area');
-        const iconBox = document.getElementById('display-icon');
-
-        if(btn.disabled) return;
-
-        btn.disabled = true;
-        resultArea.classList.remove('show-result');
-        iconBox.classList.add('shaking');
-
-        // 過濾出剩餘數量大於 0 的獎品
-        const pool = currentPrizes.filter(p => p.count > 0);
-        if (pool.length === 0) return;
-
-        // 計算總權重 (剩餘總數)
-        const totalWeight = pool.reduce((sum, p) => sum + p.count, 0);
-        
-        // 產生 0 到 totalWeight 之間的隨機數
-        let randomThreshold = Math.random() * totalWeight;
-        let picked = null;
-
-        // 加權篩選邏輯：數量越多佔據的隨機區間越大
-        for (const prize of pool) {
-            randomThreshold -= prize.count;
-            if (randomThreshold <= 0) {
-                picked = prize;
-                break;
-            }
-        }
-
-        // 防錯機制 (正常情況下 picked 不會為 null)
-        if (!picked) picked = pool[0];
-
-        // 準備更新數據
-        const newPrizes = currentPrizes.map(p => {
-            if (p.id === picked.id) return { ...p, count: p.count - 1 };
-            return p;
-        });
-
-        try {
-            await setDoc(doc(db, "games", DOC_ID), {
-                prizes: newPrizes,
-                updatedAt: new Date().toISOString()
-            });
-
-            setTimeout(() => {
-                iconBox.classList.remove('shaking');
-                resultArea.innerHTML = `🎅 恭喜獲得<span class="result-highlight">${picked.name}</span>`;
-                resultArea.classList.add('show-result');
-            }, 1200);
-
-        } catch (e) {
-            console.error(e);
-            alert("抽獎同步失敗，請檢查網路連線");
-            btn.disabled = false;
-            iconBox.classList.remove('shaking');
-        }
-    };
-
-    document.getElementById('draw-btn').onclick = window.drawPrize;
-</script>
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
