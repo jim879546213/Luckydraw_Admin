@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>創友回娘家 - 雲端即時抽獎</title>
+    <title>創友回娘家 - 聖誕雲端抽獎</title>
     <style>
+        :root {
+            --xmas-red: #d42426;
+            --xmas-green: #165b33;
+            --xmas-gold: #f8b229;
+            --snow-white: #f0f4f8;
+            --bg-gradient: linear-gradient(135deg, #1a472a 0%, #0d2b1d 100%);
+        }
+
         body {
             font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-            background: linear-gradient(135deg, #fff1eb 0%, #ace0f9 100%);
+            background: var(--bg-gradient);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -16,52 +24,211 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
+            overflow: hidden; /* 防止雪花導致滾動條 */
+            position: relative;
         }
+
+        /* 雪花特效層 */
+        .snow-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .snowflake {
+            position: absolute;
+            color: #fff;
+            font-size: 1em;
+            font-family: Arial;
+            text-shadow: 0 0 1px #000;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(105vh); }
+        }
+
         .container {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             padding: 2.5rem;
-            border-radius: 25px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             text-align: center;
             max-width: 420px;
             width: 100%;
-            border: 4px solid #fff;
+            /* 糖果手杖邊框風格 */
+            border: 8px solid transparent;
+            background-clip: padding-box, border-box;
+            background-origin: padding-box, border-box;
+            background-image: linear-gradient(to right, #fff, #fff), repeating-linear-gradient(45deg, var(--xmas-red) 0, var(--xmas-red) 15px, #ffffff 15px, #ffffff 30px);
+            position: relative;
+            z-index: 10; /* 確保在雪花之上 */
         }
-        h1 { color: #d35400; margin-bottom: 0.5rem; }
-        .gift-box-container { width: 160px; height: 160px; margin: 0 auto 30px auto; position: relative; }
+
+        /* 裝飾性標題 */
+        h1 { 
+            color: var(--xmas-red); 
+            margin-bottom: 0.5rem; 
+            font-weight: 900;
+            text-shadow: 2px 2px 0px rgba(220, 220, 220, 0.5);
+        }
+        
+        h1::before, h1::after {
+            content: '🎄';
+            margin: 0 10px;
+        }
+
+        #prize-count-info {
+            color: var(--xmas-green);
+            font-weight: bold;
+            background: #e8f5e9;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .gift-box-container { 
+            width: 160px; 
+            height: 160px; 
+            margin: 10px auto 30px auto; 
+            position: relative; 
+        }
+        
         .gacha-box {
-            width: 100%; height: 100%; background: #fff; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            border: 8px solid #f0f0f0; transition: all 0.3s;
+            width: 100%; 
+            height: 100%; 
+            background: #fff8e1; /* 淡金色背景 */
+            border-radius: 50%;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            border: 6px solid var(--xmas-gold); 
+            box-shadow: 0 0 15px rgba(248, 178, 41, 0.4);
+            transition: all 0.3s;
         }
-        .gacha-icon { width: 80px; height: 80px; }
-        .shaking { animation: shake 0.4s infinite; border-color: #ffd700; }
+        
+        .gacha-icon { width: 90px; height: 90px; }
+        
+        /* 禮物盒配色調整 */
+        .gift-base { fill: var(--xmas-red); }
+        .gift-ribbon { fill: var(--xmas-gold); }
+        
+        .shaking { animation: shake 0.5s infinite; border-color: var(--xmas-red); }
+        
         @keyframes shake {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-10deg); }
-            75% { transform: rotate(10deg); }
+            0% { transform: rotate(0deg); }
+            20% { transform: rotate(-15deg); }
+            40% { transform: rotate(10deg); }
+            60% { transform: rotate(-10deg); }
+            80% { transform: rotate(5deg); }
+            100% { transform: rotate(0deg); }
         }
+
         button {
-            background: linear-gradient(to right, #ff758c, #ff7eb3);
-            color: white; border: none; padding: 15px 50px;
-            font-size: 1.3rem; border-radius: 50px; cursor: pointer; font-weight: bold;
+            background: linear-gradient(to bottom, #d42426, #b31d1f);
+            color: white; 
+            border: none; 
+            padding: 15px 50px;
+            font-size: 1.3rem; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-weight: bold;
+            box-shadow: 0 6px 0 #8e1719, 0 10px 10px rgba(0,0,0,0.2);
+            transition: transform 0.1s, box-shadow 0.1s;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
         }
-        button:disabled { background: #bdc3c7; cursor: not-allowed; }
-        #result-area { margin-top: 25px; min-height: 60px; font-size: 1.2rem; font-weight: bold; opacity: 0; transition: 0.5s; }
+
+        /* 按鈕上的雪亮反光 */
+        button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            20% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #8e1719, 0 4px 4px rgba(0,0,0,0.2);
+        }
+
+        button:disabled { 
+            background: #95a5a6; 
+            box-shadow: none;
+            cursor: not-allowed; 
+            transform: none;
+        }
+        
+        #result-area { 
+            margin-top: 25px; 
+            min-height: 60px; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            opacity: 0; 
+            transition: 0.5s;
+            color: #2c3e50;
+        }
+        
         .show-result { opacity: 1 !important; }
-        .result-highlight { color: #ff4757; font-size: 1.8rem; display: block; }
-        #status-msg { position: fixed; bottom: 10px; font-size: 12px; color: #888; }
+        
+        .result-highlight { 
+            color: var(--xmas-red); 
+            font-size: 1.8rem; 
+            display: block; 
+            margin-top: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #status-msg { 
+            position: fixed; 
+            bottom: 10px; 
+            font-size: 12px; 
+            color: rgba(255,255,255,0.6); 
+            z-index: 5;
+        }
     </style>
 </head>
 <body>
 
+<!-- 雪花容器 -->
+<div class="snow-container" id="snow-container"></div>
+
 <div class="container">
     <h1>創友回娘家</h1>
-    <div id="prize-count-info" style="color: #7f8c8d; margin-bottom: 20px;">連線中...</div>
+    <div id="prize-count-info">連線中...</div>
 
     <div class="gift-box-container">
         <div class="gacha-box" id="display-icon">
-            <svg class="gacha-icon" viewBox="0 0 64 64"><path fill="#FFD700" d="M10 28h44v28H10z"/><path fill="#FF4757" d="M2 18h60v10H2z"/><path fill="#FF4757" d="M32 18c0-8-8-12-12-6s4 12 12 6z"/></svg>
+            <!-- 調整後的 SVG，使用 class 控制顏色 -->
+            <svg class="gacha-icon" viewBox="0 0 64 64">
+                <!-- 禮物盒主體 -->
+                <path class="gift-base" d="M10 28h44v28H10z"/>
+                <!-- 蓋子 -->
+                <path class="gift-base" d="M2 18h60v10H2z"/>
+                <!-- 緞帶 (垂直) -->
+                <path class="gift-ribbon" d="M28 28h8v28h-8z"/>
+                <path class="gift-ribbon" d="M28 18h8v10h-8z"/>
+                <!-- 蝴蝶結 -->
+                <path class="gift-ribbon" d="M32 18c0-8-8-12-12-6s4 12 12 6z"/>
+                <path class="gift-ribbon" d="M32 18c0-8 8-12 12-6s-4 12-12 6z"/>
+            </svg>
         </div>
     </div>
 
@@ -70,6 +237,30 @@
 </div>
 
 <div id="status-msg">Firebase 系統運作中 (數量權重平衡已開啟)</div>
+
+<script>
+    // 簡單的雪花生成腳本
+    function createSnowflakes() {
+        const container = document.getElementById('snow-container');
+        const count = 30; // 雪花數量
+        
+        for (let i = 0; i < count; i++) {
+            const snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+            snowflake.textContent = '❄';
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.animationDuration = Math.random() * 3 + 2 + 's'; // 2-5秒
+            snowflake.style.opacity = Math.random();
+            snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+            
+            // 隨機延遲開始，讓雪花看起來自然
+            snowflake.style.animationDelay = Math.random() * 5 + 's';
+            
+            container.appendChild(snowflake);
+        }
+    }
+    createSnowflakes();
+</script>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -98,7 +289,7 @@
             currentPrizes = data.prizes;
             
             const total = currentPrizes.reduce((sum, p) => sum + p.count, 0);
-            document.getElementById('prize-count-info').textContent = `目前剩餘獎項：${total} 份`;
+            document.getElementById('prize-count-info').textContent = `🎄 目前剩餘獎項：${total} 份`;
             
             const btn = document.getElementById('draw-btn');
             if (total > 0) {
@@ -162,7 +353,7 @@
 
             setTimeout(() => {
                 iconBox.classList.remove('shaking');
-                resultArea.innerHTML = `恭喜獲得<span class="result-highlight">${picked.name}</span>`;
+                resultArea.innerHTML = `🎅 恭喜獲得<span class="result-highlight">${picked.name}</span>`;
                 resultArea.classList.add('show-result');
             }, 1200);
 
